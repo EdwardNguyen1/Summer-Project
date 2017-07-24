@@ -1,0 +1,60 @@
+<head>
+  <!-- Plotly.js -->
+  <html lang="en-US">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>  
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+  <!-- <script src="{{ url_for('static', filename='lodash.js') }}"></script> -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+
+</head>
+<body>
+    <div ng-app="myApp" ng-controller="myCtrl">
+        
+        <p>Type (IP Addr:Port) of neighbor: <input type="text" ng-model="one_ip" size="15px">
+        <input type="radio" ng-model="server_client" value="server">Server Side
+        <input type="radio" ng-model="server_client" value="client">Client Side
+        <button ng-click="connect()">Connect {[{ one_ip }]}</button>
+        <span>  {[{ connect_status }]}</span>
+        <button ng-click="disconnect()">disconnect</button>
+        </p>
+
+        <p> Select Data:
+          <span ng-repeat="(i, v) in data_select">
+            {[{i}]} <input type="checkbox" ng-model="data_select[i]">  
+          </span>
+          <button ng-click="get_data()">Get Data</button>
+          <span>  {[{ fetched }]}</span>
+        </p>
+        
+        <p> Algorithm Parameter Setting:    
+          <span>step size--<input ng-model="mu" size="2px"></span>
+          <span>method--<select ng-model="method">
+            <option value="SVRG">SVRG</option>
+            <option value="AVRG">AVRG</option>
+            <option value="SAGA">SAGA</option>
+          </select>
+          <span>Distributed Style--<select ng-model="dist_style">
+            <option value="Diffusion">Diffusion</option>
+            <option value="EXTRA">EXTRA</option>
+          </select>
+          </span>
+        </p>
+        <button ng-click="run_alg()">Start/Resume</button>
+        <button ng-click="stop_alg()">Stop</button>
+        <button ng-click="rest_alg()">reset</button>
+
+        <span>Iteration: {[{ iter }]} </span>
+        <span> <input type="range" id="myRange" ng-model="iter_per_call">{[{ iter_per_call }]} iter-per-draw</span>
+        <div id="plot-area">
+          <div id="image-holder" ng-hide='hide_W'>
+            <!-- <canvas id="image-canvas" width="200px" height="200px"> </canvas>   -->
+            <img id="img_tag" />
+          </div>
+          <div id="plot-holder" ng-hide='hide_W'></div> 
+        </div>
+    </div>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='plotly.js') }}"></script>
+</body>

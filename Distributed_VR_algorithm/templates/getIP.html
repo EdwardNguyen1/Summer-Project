@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<style>
+table, td {
+    border: 1px solid black;
+}
+</style>
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http, $interval, $timeout, $q){
+    $scope.retrievedIP;
+    $scope.getIP = function(){
+            var table = document.getElementById("IP_Address");
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+
+            window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;   //compatibility for firefox and chrome
+            var pc = new RTCPeerConnection({iceServers:[]}), noop = function(){};      
+            pc.createDataChannel("");    //create a bogus data channel
+            pc.createOffer(pc.setLocalDescription.bind(pc), noop);    // create offer and set local description
+            pc.onicecandidate = function(ice){  //listen for candidate events
+                if(!ice || !ice.candidate || !ice.candidate.candidate)  return;
+                var myIP = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/.exec(ice.candidate.candidate)[1];
+                cell1.innerHTML = myIP;
+                $scope.retrievedIP = myIP;
+                console.log($scope.retrievedIP);
+                pc.onicecandidate = noop;
+    };
+}
+    $scope.sendIP = function(){
+            $http({
+                method : 'POST',
+                url:'/sendIP',
+                data: {'retrievedIP': $scope.retrievedIP} 
+            }).then(function mySuccess(response){
+                console.log("Success!");
+            });
+};
+    $scope.connect = function(){
+            $http:({
+                method : 'GET',
+                url: '/connect'
+            })
+    }
+});
+
+app.config(function($interpolateProvider) {
+  $interpolateProvider.startSymbol('{[{');
+  $interpolateProvider.endSymbol('}]}');
+});
+</script>
+</head>
+<body>
+<div ng-app="myApp" ng-controller="myCtrl">
+<table id="IP_Address">
+  <tr>
+    <td>IP Address</td>
+  </tr>
+</table>
+<br>
+
+<button ng-click="getIP()">Get IP</button>
+<button ng-click="sendIP()">Send IP</button>
+
+</div>
+
+
+</body>
+</html>

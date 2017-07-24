@@ -1,0 +1,22 @@
+div#plot-area{
+    height: 400px;
+    width:  1100px;
+    margin: 10px;
+    position: relative;
+}
+div#plot-holder {
+    right: 0;
+    width: 490px;
+    margin: auto;
+    height: 300px;
+    position: absolute;
+}
+
+div#image-holder {
+    left: 0;
+    width: 510px;
+    margin: auto;
+    height: 200px;
+    /*background: lightblue;*/
+    position: absolute;
+}
