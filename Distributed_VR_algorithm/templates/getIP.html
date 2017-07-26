@@ -11,38 +11,46 @@ table, td {
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope, $http, $interval, $timeout, $q){
     $scope.retrievedIP;
-    $scope.getIP = function(){
-            var table = document.getElementById("IP_Address");
-            var row = table.insertRow(-1);
-            var cell1 = row.insertCell(0);
-
-            window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;   //compatibility for firefox and chrome
+    function acceptIP(){
+        window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;   //compatibility for firefox and chrome
             var pc = new RTCPeerConnection({iceServers:[]}), noop = function(){};      
             pc.createDataChannel("");    //create a bogus data channel
             pc.createOffer(pc.setLocalDescription.bind(pc), noop);    // create offer and set local description
             pc.onicecandidate = function(ice){  //listen for candidate events
                 if(!ice || !ice.candidate || !ice.candidate.candidate)  return;
                 var myIP = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/.exec(ice.candidate.candidate)[1];
-                cell1.innerHTML = myIP;
                 $scope.retrievedIP = myIP;
-                console.log($scope.retrievedIP);
                 pc.onicecandidate = noop;
-    };
-}
+            };
+    }
+    acceptIP();
     $scope.sendIP = function(){
             $http({
                 method : 'POST',
                 url:'/sendIP',
                 data: {'retrievedIP': $scope.retrievedIP} 
             }).then(function mySuccess(response){
+                console.log($scope.retrievedIP);
                 console.log("Success!");
             });
 };
     $scope.connect = function(){
-            $http:({
+            $http({
                 method : 'GET',
-                url: '/connect'
-            })
+                url: '/connect',
+            }).then(function mySuccess(response){
+                console.log("You did it!");
+            });
+    }
+
+    $scope.buildtable = function(){
+            $http({
+                method : 'GET',
+                url: '/buildtable',
+            }).then(function mySuccess(response){
+                $scope.ip_list = response.data['iplist'];
+                console.log("Received the list")
+            });
     }
 });
 
@@ -58,12 +66,14 @@ app.config(function($interpolateProvider) {
   <tr>
     <td>IP Address</td>
   </tr>
+  <tr = ng-repeat="x in ip_list">
+    <td>{[{x}]}</td>
+  </tr>
 </table>
 <br>
-
-<button ng-click="getIP()">Get IP</button>
 <button ng-click="sendIP()">Send IP</button>
-
+<button ng-click="connect()">Connect</button>
+<button ng-click="buildtable()">Append to Table</button>
 </div>
 
 

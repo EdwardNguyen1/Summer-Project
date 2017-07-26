@@ -1,16 +1,24 @@
 from flask import Flask, render_template, jsonify, request, Response
 import sys
 import zmq
+import time
 app = Flask(__name__)
-#check code with Kun
+
 vr_alg = None
 X,Y = None, None
 socketlist = []
 iplist = []
 port = []
+count = []
+connectionDict = {}
 @app.route("/", methods=['GET'])
 def index():
     return render_template("getIP.html")
+
+@app.route("/buildtable", methods=['GET'])
+def buildtable(): 
+    print ("Sending ip...")
+    return jsonify({'iplist': iplist})
 
 @app.route("/sendIP", methods=['POST'])
 def retrieveIP():
@@ -20,23 +28,22 @@ def retrieveIP():
 
 @app.route("/connect", methods=['GET'])
 def connect():
-    count = 0
-    count1 = 0
     portNumber = 5000
-    port.append(portNumber)
-    while count < len(iplist):
-        context = zmq.Context()
-        s = context.socket(zmq.PAIR)
-        s.bind("tcp://"+iplist[count]+":"+port[count])
-        socketlist.append(s)
-        portNumber += 1
+    counter = 1
+    iplistreversed = iplist[::-1]
+    for x in range(len(iplist)):
         port.append(portNumber)
-        count += 1
-    while count1 < (len(iplist)-1):
-        context = zmq.Context()
-        s = context.socket(zmq.PAIR)
-        s.connect("tcp://"+iplist[count+1]+":"port[count1])
-        socketlist.append(s)
-        count1 +=1
+        portNumber += 1
+    for y in range(len(iplist)):
+        count.append(counter)
+        counter += 1
+    combinedList = zip(iplist, iplistreversed, port)
+    for k in range(len(combinedList)):
+        connectionDict[k+1]= combinedList[k]
+    print('Success!')
+    for x in iplist:
+        print (x)
+    return Response(None)
+    
 if __name__ == '__main__':
-    app.run(debug=False, port = sys.argv[1])
+    app.run(host="192.168.0.15", debug=False, port = sys.argv[1])
